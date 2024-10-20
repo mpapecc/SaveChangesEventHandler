@@ -1,7 +1,7 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using SaveChangesEventHandlers.Core.Abstraction;
 using SaveChangesEventHandlers.Core.Implemention;
+using System.Reflection;
 
 namespace SaveChangesEventHandlers.Core
 {
@@ -9,17 +9,22 @@ namespace SaveChangesEventHandlers.Core
     {
         public static IServiceCollection AddSaveChangesInfrastructure(this IServiceCollection services)
         {
-            AppDomain.CurrentDomain.GetAssemblies().ToList()
-            .ForEach(a => 
-            {
-                a.GetTypes().Where(t => typeof(ISaveChangesHandlerKey).IsAssignableFrom(t) && !t.IsInterface)
-                .ToList()
-                .ForEach(h => services.AddScoped(typeof(ISaveChangesHandlerKey), h));
-            });
+            RegisterAllSaveChangesHandler(services);
 
             services.AddScoped<SaveChangesEventsProvider>();
             services.AddScoped<ISaveChangesEventsDispatcher, SaveChangesEventsDispatcher>();
             return services;
+        }
+
+        private static void RegisterAllSaveChangesHandler(IServiceCollection services) 
+        {
+            AppDomain.CurrentDomain.GetAssemblies().ToList()
+            .ForEach(assembly =>
+            {
+                assembly.GetTypes().Where(type => typeof(ISaveChangesHandlerKey).IsAssignableFrom(type) && !type.IsInterface)
+                .ToList()
+                .ForEach(type => services.AddScoped(typeof(ISaveChangesHandlerKey), type));
+            });
         }
     }
 }

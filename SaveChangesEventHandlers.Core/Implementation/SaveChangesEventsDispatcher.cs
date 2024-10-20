@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SaveChangesEventHandlers.Core.Abstraction;
 using System.Reflection;
+using System.Transactions;
 
 namespace SaveChangesEventHandlers.Core.Implemention
 {
@@ -10,40 +11,75 @@ namespace SaveChangesEventHandlers.Core.Implemention
         private readonly SaveChangesEventsProvider saveChangesEventsProvider;
         public Dictionary<Type, ISaveChangesHandlerKey> saveChangesEvents = new();
 
-        private EntityEntry[] forUpdate { get; set; } = new EntityEntry[1];
-        private EntityEntry[] forDelete { get; set; } = new EntityEntry[1] ;
-        private EntityEntry[] forAdd { get; set; } = new EntityEntry[1] ;
+        private IEnumerable<EntityEntry> forUpdate { get; set; } = new List<EntityEntry>();
+        private IEnumerable<EntityEntry> forDelete { get; set; } = new List<EntityEntry>() ;
+        private IEnumerable<EntityEntry> forAdd { get; set; } = new List<EntityEntry>() ;
+        private IEnumerable<EntityEntry> passToAfterAdd { get; set; } = new List<EntityEntry>();
+        private IEnumerable<EntityEntry> passToAfterUpdate { get; set; } = new List<EntityEntry>();
+
 
         public SaveChangesEventsDispatcher(SaveChangesEventsProvider saveChangesEventsProvider)
         {
             this.saveChangesEventsProvider = saveChangesEventsProvider;
         }
 
+        public async Task<int> SaveChangesWithEventsDispatcher(DbContext dbContext, Func<CancellationToken, Task<int>> saveChanges, CancellationToken cancellationToken)
+        {
+            ProccessEntitesForBeforeActions(dbContext);
+
+            //TODO: suport save changes iterations
+            DispatchBefore();
+
+            ProccessEntitesForAfterActions(dbContext);
+
+            var savedEntites = await saveChanges.Invoke(cancellationToken);
+
+            DispatchAfter();
+
+            return savedEntites;
+        }
+
         public void DispatchAfter()
         {
 
-            InvokeNewActionForEntites(this.forAdd.ToList(), nameof(ISaveChangesHandler<IEntity>.AfterNewPersisted));
+            InvokeNewActionForEntites(this.passToAfterAdd, nameof(ISaveChangesHandler<IEntity>.AfterNewPersisted));
 
-            InvokeUpdateActionForEntites(this.forUpdate.ToList(), nameof(ISaveChangesHandler<IEntity>.AfterUpdate));
+            InvokeUpdateActionForEntites(this.passToAfterUpdate, nameof(ISaveChangesHandler<IEntity>.AfterUpdate));
         }
 
         public void DispatchBefore()
         {
-            InvokeNewActionForEntites(this.forAdd.ToList(), nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
+            InvokeNewActionForEntites(this.forAdd, nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
 
-            InvokeUpdateActionForEntites(this.forUpdate.ToList(), nameof(ISaveChangesHandler<IEntity>.BeforeUpdate));
+            InvokeUpdateActionForEntites(this.forUpdate, nameof(ISaveChangesHandler<IEntity>.BeforeUpdate));
         }
 
-        public void GetChangeEntites(DbContext dbContext)
+        public void ProccessEntitesForBeforeActions(DbContext dbContext)
         {
-            dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Modified).ToList().CopyTo(this.forUpdate);
-            dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Deleted).ToList().CopyTo(this.forDelete);
-            dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Added).ToList().CopyTo(this.forAdd);
+            this.forUpdate = dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Modified);
+            this.forDelete = dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Deleted);
+            this.forAdd = dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Added);
+        }
+
+        public void ProccessEntitesForAfterActions(DbContext dbContext)
+        {
+            var passToAfterAddTempArray = new EntityEntry[1];
+            var passToAfterUpdateTempArray = new EntityEntry[1];
+
+            this.forAdd.ToList().CopyTo(passToAfterAddTempArray);
+            this.forUpdate.ToList().CopyTo(passToAfterUpdateTempArray);
+
+            var passToAfterAddTempList = passToAfterAddTempArray.ToList();
+            var passToAfterUpdateTempList = passToAfterUpdateTempArray.ToList();
+
+            this.passToAfterAdd = passToAfterAddTempList.Where(entity => entity != null);
+            this.passToAfterUpdate = passToAfterUpdateTempList.Where(entity => entity != null);
         }
 
         public void InvokeNewActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
         {
-            if (entities.First() != null)
+
+            if (entities != null)
             {
                 foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
                 {
@@ -53,10 +89,14 @@ namespace SaveChangesEventHandlers.Core.Implemention
                     {
                         foreach (var entity in item)
                         {
-                            var underlyingObject = entity.CurrentValues.ToObject();
+                            var newValues = entity.CurrentValues.ToObject();
+
+                            object[] arguments = new object[] { newValues };
 
                             var method = handler.GetType().GetMethod(methodName);
-                            method?.Invoke(handler, new object[] { underlyingObject });
+                            method?.Invoke(handler, arguments);
+
+                            entity.CurrentValues.SetValues(arguments[0]);
                         }
                     }
                 }
@@ -65,7 +105,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
         public void InvokeUpdateActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
         {
-            if (entities.First() != null)
+            if (entities != null)
             {
                 foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
                 {
@@ -75,33 +115,19 @@ namespace SaveChangesEventHandlers.Core.Implemention
                     {
                         foreach (var entity in item)
                         {
-
                             var newValues = entity.CurrentValues.ToObject();
-                            var oldValues = entity.GetDatabaseValues().ToObject();
+                            var oldValues = entity.GetDatabaseValues().ToObject(); // find way not to check on db
 
-                            CheckValues(entity.CurrentValues, entity.OriginalValues);
+                            object[] arguments = new object[] { oldValues, newValues };
 
                             var method = handler.GetType().GetMethod(methodName);
-                            method?.Invoke(handler, new object[] { oldValues, newValues });
+                            method?.Invoke(handler, arguments);
+
+                            entity.CurrentValues.SetValues(arguments[1]);
                         }
                     }
                 }
             }
-        }
-
-        private void CheckValues(PropertyValues current, PropertyValues newValues)
-        {
-
-        }
-
-
-        public async Task<int> SaveChangesWithEventsDispatcher(DbContext dbContext, Func<CancellationToken, Task<int>> saveChanges, CancellationToken cancellationToken)
-        {
-            GetChangeEntites(dbContext);
-            DispatchBefore();
-            var savedEntites = await saveChanges.Invoke(cancellationToken);
-            DispatchAfter();
-            return savedEntites;
         }
     }
 }
