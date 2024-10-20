@@ -18,26 +18,28 @@ namespace SaveChangesEventHandlers.Core.Implemention
         private IEnumerable<EntityEntry> passToAfterUpdate { get; set; } = new List<EntityEntry>();
         private IEnumerable<EntityEntry> passToAfterDelete { get; set; } = new List<EntityEntry>();
 
-
         public SaveChangesEventsDispatcher(SaveChangesEventsProvider saveChangesEventsProvider)
         {
             this.saveChangesEventsProvider = saveChangesEventsProvider;
         }
 
-        public async Task<int> SaveChangesWithEventsDispatcher(DbContext dbContext, Func<CancellationToken, Task<int>> saveChanges, CancellationToken cancellationToken)
+        public int SaveChangesWithEventsDispatcher(DbContext dbContext, Func<int> saveChanges)
         {
-            ProccessEntitesForBeforeActions(dbContext);
+            using(var scope = new TransactionScope())
+            {
+                ProccessEntitesForBeforeActions(dbContext);
 
-            //TODO: suport save changes iterations
-            DispatchBefore();
+                //TODO: suport save changes iterations
+                DispatchBefore();
 
-            ProccessEntitesForAfterActions(dbContext);
+                ProccessEntitesForAfterActions(dbContext);
 
-            var savedEntites = await saveChanges.Invoke(cancellationToken);
+                var savedEntites = saveChanges.Invoke();
 
-            DispatchAfter();
-
-            return savedEntites;
+                DispatchAfter();
+                scope.Complete();
+                return savedEntites;
+            }
         }
 
         public void DispatchAfter()

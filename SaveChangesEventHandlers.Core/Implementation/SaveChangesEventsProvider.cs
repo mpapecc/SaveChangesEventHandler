@@ -17,7 +17,6 @@ namespace SaveChangesEventHandlers.Core.Implemention
             return this.serviceProvider.GetServices<ISaveChangesHandlerKey>().ToDictionary(s => s.HandlerForType());
         }
 
-
         //TODO : get only needed, not all and them filter for one
         public ISaveChangesHandlerKey? GetServiceHandlerForType(Type handlerForType)
         {

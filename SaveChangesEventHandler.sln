@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contacts.Api", "Contacts.Api\Contacts.Api.csproj", "{C26FD7D2-678E-4FA9-81EF-0A2DCF82BE46}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SaveChangesEventHandlers.Example", "Contacts.Api\SaveChangesEventHandlers.Example.csproj", "{C26FD7D2-678E-4FA9-81EF-0A2DCF82BE46}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaveChangesEventHandlers.Core", "SaveChangesEventHandlers.Core\SaveChangesEventHandlers.Core.csproj", "{9B56F83C-7BB2-47B7-BEFC-7B454436254F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SaveChangesEventHandlers.Core", "SaveChangesEventHandlers.Core\SaveChangesEventHandlers.Core.csproj", "{9B56F83C-7BB2-47B7-BEFC-7B454436254F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaveChangesEventsHandler.Test", "SaveChangesEventsHandler.Test\SaveChangesEventsHandler.Test.csproj", "{0DB998B0-28FE-4E5E-94AA-7D39744150E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SaveChangesEventsHandler.Test", "SaveChangesEventsHandler.Test\SaveChangesEventsHandler.Test.csproj", "{0DB998B0-28FE-4E5E-94AA-7D39744150E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
