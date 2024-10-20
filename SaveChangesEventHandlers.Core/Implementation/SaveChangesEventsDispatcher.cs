@@ -16,6 +16,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
         private IEnumerable<EntityEntry> forAdd { get; set; } = new List<EntityEntry>() ;
         private IEnumerable<EntityEntry> passToAfterAdd { get; set; } = new List<EntityEntry>();
         private IEnumerable<EntityEntry> passToAfterUpdate { get; set; } = new List<EntityEntry>();
+        private IEnumerable<EntityEntry> passToAfterDelete { get; set; } = new List<EntityEntry>();
 
 
         public SaveChangesEventsDispatcher(SaveChangesEventsProvider saveChangesEventsProvider)
@@ -45,6 +46,8 @@ namespace SaveChangesEventHandlers.Core.Implemention
             InvokeNewActionForEntites(this.passToAfterAdd, nameof(ISaveChangesHandler<IEntity>.AfterNewPersisted));
 
             InvokeUpdateActionForEntites(this.passToAfterUpdate, nameof(ISaveChangesHandler<IEntity>.AfterUpdate));
+
+            InvokeNewActionForEntites(this.passToAfterDelete, nameof(ISaveChangesHandler<IEntity>.AfterDelete));
         }
 
         public void DispatchBefore()
@@ -52,6 +55,8 @@ namespace SaveChangesEventHandlers.Core.Implemention
             InvokeNewActionForEntites(this.forAdd, nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
 
             InvokeUpdateActionForEntites(this.forUpdate, nameof(ISaveChangesHandler<IEntity>.BeforeUpdate));
+
+            InvokeNewActionForEntites(this.forDelete, nameof(ISaveChangesHandler<IEntity>.BeforeDelete));
         }
 
         public void ProccessEntitesForBeforeActions(DbContext dbContext)
@@ -63,17 +68,21 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
         public void ProccessEntitesForAfterActions(DbContext dbContext)
         {
-            var passToAfterAddTempArray = new EntityEntry[1];
-            var passToAfterUpdateTempArray = new EntityEntry[1];
+            var passToAfterAddTempArray = new EntityEntry[this.forAdd.Count()];
+            var passToAfterUpdateTempArray = new EntityEntry[this.forUpdate.Count()];
+            var passToAfterDeleteTempArray = new EntityEntry[this.forDelete.Count()];
 
             this.forAdd.ToList().CopyTo(passToAfterAddTempArray);
             this.forUpdate.ToList().CopyTo(passToAfterUpdateTempArray);
+            this.forDelete.ToList().CopyTo(passToAfterDeleteTempArray);
 
             var passToAfterAddTempList = passToAfterAddTempArray.ToList();
             var passToAfterUpdateTempList = passToAfterUpdateTempArray.ToList();
+            var passToAfterDeleteTempList = passToAfterUpdateTempArray.ToList();
 
             this.passToAfterAdd = passToAfterAddTempList.Where(entity => entity != null);
             this.passToAfterUpdate = passToAfterUpdateTempList.Where(entity => entity != null);
+            this.passToAfterDelete = passToAfterDeleteTempList.Where(entity => entity != null);
         }
 
         public void InvokeNewActionForEntites(IEnumerable<EntityEntry> entities, string methodName)

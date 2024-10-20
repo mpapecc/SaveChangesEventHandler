@@ -6,5 +6,7 @@
         void AfterNewPersisted(T entity);
         void BeforeUpdate(T oldEntity, T newEntity);
         void AfterUpdate(T oldEntity, T newEntity);
+        void BeforeDelete(T entity);
+        void AfterDelete(T entity);
     }
 }
