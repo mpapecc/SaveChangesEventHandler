@@ -18,7 +18,9 @@ namespace SaveChangesEventsHandler.Test.Helpers
         private DbContextOptions<TestDbContext> CreateOptions()
         {
             return new DbContextOptionsBuilder<TestDbContext>()
-                .UseSqlite(_connection).Options;
+                .UseSqlite(_connection)
+                .ConfigureWarnings(x => x.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.AmbientTransactionWarning))
+                .Options;
         }
 
         public TestDbContext CreateContext()

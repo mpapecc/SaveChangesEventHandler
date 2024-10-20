@@ -9,11 +9,19 @@ namespace SaveChangesEventsHandler.Test.TestData
 {
     public class TestModelSaveChangesHandler : ISaveChangesHandler<TestModel>
     {
+        public void AfterDelete(TestModel entity)
+        {
+        }
+
         public void AfterNewPersisted(TestModel entity)
         {
         }
 
         public void AfterUpdate(TestModel oldEntity, TestModel newEntity)
+        {
+        }
+
+        public void BeforeDelete(TestModel entity)
         {
         }
 

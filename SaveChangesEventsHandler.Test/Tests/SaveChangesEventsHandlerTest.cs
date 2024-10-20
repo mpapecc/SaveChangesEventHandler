@@ -25,7 +25,7 @@ namespace SaveChangesEventsHandler.Test.Tests
                 {
                     var testModel = new TestModel() { FirstName = nameof(test_BeforeNewPersisted) };
                     context.TestModels.Add(testModel);
-                    await context.SaveChangesAsync();
+                    context.SaveChanges();
                 }
 
                 using (var context = factory.CreateContext())
@@ -53,13 +53,13 @@ namespace SaveChangesEventsHandler.Test.Tests
                     var testModel = new TestModel() { FirstName = nameof(test_BeforeUpdate) };
                     context.TestModels.Add(testModel);
 
-                    await context.SaveChangesAsync();
+                    context.SaveChanges();
 
                     var u = await context.TestModels.FirstOrDefaultAsync(testModel => testModel.FirstName == nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
                     u.FirstName = nameof(test_BeforeUpdate);
                     context.Update(u);
 
-                    await context.SaveChangesAsync();
+                    context.SaveChanges();
                 }
 
                 using (var context = factory.CreateContext())
