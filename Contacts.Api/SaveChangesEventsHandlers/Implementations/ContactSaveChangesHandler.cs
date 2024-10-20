@@ -29,9 +29,16 @@ namespace Contacts.Api.SaveChangesEventsHandlers.Implementations
         {
             if (entity.Address.Contains("Sucidar"))
                 throw new InvalidDataException("Address cna not be sucidar");
+            entity.FirstName = "alo bree";
 
-            var a = this.contactRepository.GetAll();
-            this.logger.LogInformation(a.First().FirstName);
+            var contact = new Contact()
+            {
+                FirstName = entity.FirstName,
+                LastName = entity.LastName,
+                Address = entity.Address,
+                IsBookmarked = entity.IsBookmarked
+            };
+            this.contactRepository.Add(contact);    
             this.logger.LogInformation("before contact is persisted");
         }
 
@@ -46,5 +53,15 @@ namespace Contacts.Api.SaveChangesEventsHandlers.Implementations
         }
 
         public Type HandlerForType() => typeof(Contact);
+
+        public void BeforeDelete(Contact entity)
+        {
+            this.logger.LogInformation("before contact is deleted".ToUpper());
+        }
+
+        public void AfterDelete(Contact entity)
+        {
+            this.logger.LogInformation("after contact is deleted".ToUpper());
+        }
     }
 }

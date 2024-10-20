@@ -23,16 +23,16 @@ namespace Contacts.Api.Controllers
         }
 
         [HttpGet]
-        public virtual async Task<IActionResult> GetAll()
+        public virtual ActionResult GetAll()
         {
-            var result = await _baseRepository.GetAll().ToListAsync();
+            var result = _baseRepository.GetAll().ToList();
             return Ok(_customMap.MapList<TDto,T>(result));
         }
 
         [HttpGet("{id}")]
-        public virtual async Task<IActionResult> Find(Guid id)
+        public virtual IActionResult Find(Guid id)
         {
-            var record =  await _baseRepository.GetById(id).FirstOrDefaultAsync();
+            var record =  _baseRepository.GetById(id).FirstOrDefault();
             if (record == null)
                 return NotFound();
 
@@ -40,37 +40,31 @@ namespace Contacts.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] TDetails record)
+        public IActionResult Create([FromBody] TDetails record)
         {
-            if (await _baseRepository.AddAsync(_customMap.Map<T, TDetails>(record)))
-                return Ok(record); 
-            return BadRequest();
-            
+            _baseRepository.Add(_customMap.Map<T, TDetails>(record));
+            _baseRepository.Commit();
+            return Ok(record); 
         }
 
         [HttpPut("{id}")]
-        public virtual async Task<IActionResult> Update(Guid id, [FromBody] TDetails record)
+        public virtual IActionResult Update(Guid id, [FromBody] TDetails record)
         {
             var data = _customMap.Map<T,TDetails>(record);
 
             if (id != data.Id)
                 return BadRequest();
 
-            
-            if (await _baseRepository.UpdateAsync(data))
-                return Ok(record);
-            return BadRequest();
-            
+
+            _baseRepository.Update(data);
+            return Ok(data);
         }
 
         [HttpDelete("{id}")]
-        public virtual async Task<IActionResult> Delete(Guid id)
+        public virtual IActionResult Delete(Guid id)
         {
-            
-            if (await _baseRepository.DeleteAsync(id))
-                return NoContent();
-            return BadRequest();
-            
+            _baseRepository.Delete(id);
+            return Ok();
         }
     }
 }

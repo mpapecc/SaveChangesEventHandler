@@ -21,9 +21,9 @@ namespace Contacts.Api
         public DbSet<Email> Emails { get; set; }
         public DbSet<Number> Numbers { get; set; }
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override int SaveChanges()
         {
-            return await this.saveChangesEventsDispatcher.SaveChangesWithEventsDispatcher(this, base.SaveChangesAsync, cancellationToken);
+            return  this.saveChangesEventsDispatcher.SaveChangesWithEventsDispatcher(this, base.SaveChanges);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

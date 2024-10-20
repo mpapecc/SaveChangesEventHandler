@@ -6,16 +6,18 @@
 
         IQueryable<T> GetAll();
 
-        Task<bool> AddAsync(T entity);
+        void Add(T entity);
 
-        Task<bool> AddRangeAsync(List<T> entities);
+        void AddRange(List<T> entities);
 
-        Task<bool> UpdateAsync(T entity);
+        void Update(T entity);
 
-        Task<bool> UpdateRangeAsync(List<T> entities);
+        void UpdateRange(List<T> entities);
 
-        Task<bool> DeleteAsync(Guid id);
+        void Delete(Guid id);
 
-        Task<bool> DeleteRangeAsync(List<T> entities);
+        void DeleteRange(List<T> entities);
+
+        bool Commit();
     }
 }

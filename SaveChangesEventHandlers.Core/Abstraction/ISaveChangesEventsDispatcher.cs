@@ -8,6 +8,6 @@ namespace SaveChangesEventHandlers.Core.Abstraction
         void DispatchAfter();
         void ProccessEntitesForBeforeActions(DbContext dbContext);
         void ProccessEntitesForAfterActions(DbContext dbContext);
-        Task<int> SaveChangesWithEventsDispatcher(DbContext dbContext, Func<CancellationToken, Task<int>> saveChanges, CancellationToken cancellationToken);
+        int SaveChangesWithEventsDispatcher(DbContext dbContext, Func<int> saveChanges);
     }
 }

@@ -22,7 +22,7 @@ namespace Contacts.Api.Repositories.Implementation
             return _context.Set<T>().Where(entity => entity.Id == id);
         }
 
-        public async Task<bool> AddAsync(T entity)
+        public void Add(T entity)
         {
             if (entity == null)
                 throw new ArgumentOutOfRangeException(nameof(entity));
@@ -30,44 +30,36 @@ namespace Contacts.Api.Repositories.Implementation
             entity.CreationDate = DateTime.UtcNow;
             entity.LastUpdateDate = DateTime.UtcNow;
 
-            await _context.Set<T>().AddAsync(entity);
+            _context.Set<T>().Add(entity);
 
-            return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> UpdateAsync(T entity)
+        public void Update(T entity)
         {
             entity.LastUpdateDate = DateTime.UtcNow;
 
             _context.Set<T>().Update(entity);
-            return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public void Delete(Guid id)
         {
-            var entity = await _context.Set<T>().FirstOrDefaultAsync(e => e.Id == id);
-
-            if (entity == null)
-                return false;
+            var entity = _context.Set<T>().FirstOrDefault(e => e.Id == id);
 
             _context.Set<T>().Remove(entity);
-            return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> DeleteRangeAsync(List<T> entities)
+        public void DeleteRange(List<T> entities)
         {
             _context.RemoveRange(entities);
-            return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> UpdateRangeAsync(List<T> entities)
+        public void UpdateRange(List<T> entities)
         {
             entities.ForEach(x => x.LastUpdateDate = DateTime.UtcNow);
             _context.UpdateRange(entities);
-            return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> AddRangeAsync(List<T> entities)
+        public void AddRange(List<T> entities)
         {
             foreach (var entity in entities)
             {
@@ -76,7 +68,11 @@ namespace Contacts.Api.Repositories.Implementation
             }
 
             _context.AddRange(entities);
-            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public bool Commit()
+        {
+            return _context.SaveChanges() > 0;
         }
     }
 }

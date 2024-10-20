@@ -36,7 +36,7 @@ namespace Contacts.Api.Services.Implementation
         }
 
 
-        public async Task<List<ContactDto>?> GetAll(List<Guid> tags, string? firstName = null,  string? lastName = null)
+        public List<ContactDto>? GetAll(List<Guid> tags, string? firstName = null,  string? lastName = null)
         {
             var query = _contactRepository.GetAll();
             if (firstName != null)
@@ -54,41 +54,44 @@ namespace Contacts.Api.Services.Implementation
                 tags.ForEach(tag => query = query.Where(ContactExpressions.ContactContainsTagQuery(tag)));
             }
 
-            var result = await query.OrderBy(c => c.FirstName).ToListAsync();
+            var result = query.OrderBy(c => c.FirstName).ToList();
 
 
             return _customMap.MapList<ContactDto, Contact>(result);
         }
 
-        public async Task<ContactDetailDto?> GetById(Guid contactId)
+        public ContactDetailDto? GetById(Guid contactId)
         {
-            var record = await _contactRepository.GetById(contactId)
+            var record = _contactRepository.GetById(contactId)
                 .Include(c => c.Emails)
                 .Include(c => c.Numbers)
                 .Include(c => c.ContactTags)
-                .ThenInclude(ct => ct.Tag).FirstOrDefaultAsync();
+                .ThenInclude(ct => ct.Tag).FirstOrDefault();
 
-            return record == null ? null: _customMap.Map<ContactDetailDto,Contact>(record);
+            return _customMap.Map<ContactDetailDto,Contact>(record);
         }
 
 
-        public async Task<ContactDetailDto?> Update(Guid contactId, ContactDetailDto record)
+        public ContactDetailDto? Update(Guid contactId, ContactDetailDto record)
         {
             if (contactId != record.Id)
                 return null;
 
-            await UpdateContactEmails(contactId, record);
-            await UpdateContactNumbers(contactId, record);
-            await UpdateContactTags(contactId, record);
+            UpdateContactEmails(contactId, record);
+            UpdateContactNumbers(contactId, record);
+            UpdateContactTags(contactId, record);
+
             record.Emails.Clear();
             record.Numbers.Clear();
             record.ContactTags.Clear();
 
             var data = _customMap.Map<Contact,ContactDetailDto>(record);
-            return await _contactRepository.UpdateAsync(data) ? record: null;
+            _contactRepository.Update(data);
+            _contactRepository.Commit();
+            return record;
         }
 
-        private async Task UpdateContactEmails(Guid id, ContactDetailDto record)
+        private void UpdateContactEmails(Guid id, ContactDetailDto record)
         {
             List<Email> allContactEmails = _emailRepository.GetAll().Where(e => e.ContactId == id).ToList();
 
@@ -114,25 +117,26 @@ namespace Contacts.Api.Services.Implementation
             {
                 if (!allContactEmails.Where(e => e.Id == email.Id).Any())
                 {
+                    email.ContactId = id;
                     emailsForAdd.Add(email);
                 }
             }
 
             if (emailsForDelete.Any())
             {
-                await _emailRepository.DeleteRangeAsync(emailsForDelete);
+                 _emailRepository.DeleteRange(emailsForDelete);
             }
             if (emailsForUpdate.Any())
             {
-                await _emailRepository.UpdateRangeAsync(emailsForUpdate);
+                 _emailRepository.UpdateRange(emailsForUpdate);
             }
             if (emailsForAdd.Any())
             {
-                await _emailRepository.UpdateRangeAsync(emailsForAdd);
+                 _emailRepository.UpdateRange(emailsForAdd);
             }
         }
 
-        private async Task UpdateContactNumbers(Guid id, ContactDetailDto record)
+        private void UpdateContactNumbers(Guid id, ContactDetailDto record)
         {
             List<Number> allContactNumbers = _numberRepository.GetAll().Where(e => e.ContactId == id).ToList();
 
@@ -158,25 +162,26 @@ namespace Contacts.Api.Services.Implementation
             {
                 if (!allContactNumbers.Where(e => e.Id == number.Id).Any())
                 {
+                    number.ContactId = id;
                     emailsForAdd.Add(number);
                 }
             }
 
             if (numbersForDelete.Any())
             {
-                await _numberRepository.DeleteRangeAsync(numbersForDelete);
+                 _numberRepository.DeleteRange(numbersForDelete);
             }
             if (emailsForUpdate.Any())
             {
-                await _numberRepository.UpdateRangeAsync(emailsForUpdate);
+                 _numberRepository.UpdateRange(emailsForUpdate);
             }
             if (emailsForAdd.Any())
             {
-                await _numberRepository.UpdateRangeAsync(emailsForAdd);
+                 _numberRepository.UpdateRange(emailsForAdd);
             }
         }
 
-        private async Task UpdateContactTags(Guid id, ContactDetailDto record)
+        private void UpdateContactTags(Guid id, ContactDetailDto record)
         {
             List<ContactTag> allContactTags = _contactTagRepository.GetAll().Where(ct => ct.ContactId == id).ToList();
             List<ContactTag> contactTagsForDelete = new List<ContactTag>();
@@ -202,13 +207,13 @@ namespace Contacts.Api.Services.Implementation
 
             if (contactTagsForDelete.Any())
             {
-                await _contactTagRepository.DeleteRangeAsync(contactTagsForDelete);
+                 _contactTagRepository.DeleteRange(contactTagsForDelete);
             }
 
             if (contactTagsForAdd.Any())
             {
 
-                await _contactTagRepository.AddRangeAsync(contactTagsForAdd);
+                 _contactTagRepository.AddRange(contactTagsForAdd);
             }
         }
 

@@ -1,13 +1,9 @@
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Contacts.Api;
-using Contacts.Api.SaveChangesEventsHandlers;
 using Contacts.Api.Models;
 using Contacts.Api.Repositories.Abstraction;
 using Contacts.Api.Repositories.Implementation;
 using Contacts.Api.Services.Abstraction;
 using Contacts.Api.Services.Implementation;
-using Contacts.Api.Utils.Autofac;
 using Contacts.Api.Utils.Mappings.Abstraction;
 using Contacts.Api.Utils.Mappings.Implementation;
 using FluentValidation;
@@ -40,12 +36,6 @@ builder.Services.AddSaveChangesInfrastructure();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddSingleton<IValidator<Contact>, ContactValidator>();
 builder.Services.AddSingleton<ICustomMap, CustomMap>();
-//builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
-//    .ConfigureContainer<ContainerBuilder>(builder =>
-//    {
-//        builder.RegisterModule(new DiRegister());
-//    });
-
 
 var app = builder.Build();
 

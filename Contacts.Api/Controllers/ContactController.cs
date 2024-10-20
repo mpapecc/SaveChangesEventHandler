@@ -15,6 +15,7 @@ namespace Contacts.Api.Controllers
     {
 
         private readonly IContactService _contactService;
+        private readonly IBaseRepository<Contact> contactRepository;
         private readonly DataContext _dataContext;
 
         public ContactController(
@@ -24,37 +25,37 @@ namespace Contacts.Api.Controllers
             DataContext dataContext) : base(contactRepository, customMap)
         {
             _contactService = contactService;
+            this.contactRepository = contactRepository;
             _dataContext = dataContext;
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search( [FromQuery] List<Guid> tags, [FromQuery] string? firstName = null, [FromQuery] string? lastName = null)
+        public IActionResult Search( [FromQuery] List<Guid> tags, [FromQuery] string? firstName = null, [FromQuery] string? lastName = null)
         {
-            return Ok(await _contactService.GetAll(tags,firstName,lastName));
+            return Ok(_contactService.GetAll(tags,firstName,lastName));
         }
 
        
 
         [HttpPut("{id}")]
-        public override async Task<IActionResult> Update(Guid id, [FromBody] ContactDetailDto record)
+        public override IActionResult Update(Guid id, [FromBody] ContactDetailDto record)
         {
 
-            var result = await _contactService.Update(id, record);
-            return result == null ? NotFound() : Ok(record);
+            _contactService.Update(id, record);
+            return  Ok(record);
         }
 
-        public override async Task<IActionResult> Delete(Guid id)
-        {
-            var result = await _dataContext.Database.ExecuteSqlRawAsync("dbo.DeleteContact @Id",
-                new SqlParameter("@Id", id));
-
-            return Ok(result);
-        }
-
-        [HttpGet("di-test")]
-        public void TestDi()
+        [HttpPut("UpdateHandler/{id}")]
+        public IActionResult UpdateHandler(Guid id, string name)
         {
 
+            var contact = this.contactRepository.GetById(id).First();
+
+            contact.FirstName = name;
+
+            this.contactRepository.Update(contact);
+
+            return Ok(contact);
         }
 
     }
