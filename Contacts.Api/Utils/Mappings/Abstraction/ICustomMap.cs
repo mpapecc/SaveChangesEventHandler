@@ -1,4 +1,4 @@
-﻿namespace Contacts.Api.Utils.Mappings.Abstraction
+﻿namespace SaveChangesEventHandlers.Example.Utils.Mappings.Abstraction
 {
     public interface ICustomMap
     {

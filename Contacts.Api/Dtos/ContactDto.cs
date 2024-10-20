@@ -1,6 +1,6 @@
-﻿using Contacts.Api.Models;
+﻿using SaveChangesEventHandlers.Example.Models;
 
-namespace Contacts.Api.Dtos
+namespace SaveChangesEventHandlers.Example.Dtos
 {
     public class ContactDto
     {

@@ -1,8 +1,9 @@
-﻿using Contacts.Api.Models;
-using Contacts.Api.Repositories.Abstraction;
+﻿using SaveChangesEventHandlers.Example.Models;
+using SaveChangesEventHandlers.Example.Repositories.Abstraction;
 using Microsoft.EntityFrameworkCore;
+using SaveChangesEventHandlers.Example;
 
-namespace Contacts.Api.Repositories.Implementation
+namespace SaveChangesEventHandlers.Example.Repositories.Implementation
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity
     {

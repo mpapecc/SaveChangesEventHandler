@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Contacts.Api.Models
+namespace SaveChangesEventHandlers.Example.Models
 {
     public class BaseEntity
     {

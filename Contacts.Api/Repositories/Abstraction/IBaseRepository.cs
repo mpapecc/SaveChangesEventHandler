@@ -1,4 +1,4 @@
-﻿namespace Contacts.Api.Repositories.Abstraction
+﻿namespace SaveChangesEventHandlers.Example.Repositories.Abstraction
 {
     public interface IBaseRepository<T>
     {

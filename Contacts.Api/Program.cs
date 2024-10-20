@@ -1,15 +1,15 @@
-using Contacts.Api;
-using Contacts.Api.Models;
-using Contacts.Api.Repositories.Abstraction;
-using Contacts.Api.Repositories.Implementation;
-using Contacts.Api.Services.Abstraction;
-using Contacts.Api.Services.Implementation;
-using Contacts.Api.Utils.Mappings.Abstraction;
-using Contacts.Api.Utils.Mappings.Implementation;
+using SaveChangesEventHandlers.Example.Models;
+using SaveChangesEventHandlers.Example.Repositories.Abstraction;
+using SaveChangesEventHandlers.Example.Repositories.Implementation;
+using SaveChangesEventHandlers.Example.Services.Abstraction;
+using SaveChangesEventHandlers.Example.Services.Implementation;
+using SaveChangesEventHandlers.Example.Utils.Mappings.Abstraction;
+using SaveChangesEventHandlers.Example.Utils.Mappings.Implementation;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using SaveChangesEventHandlers.Core;
+using SaveChangesEventHandlers.Example;
 
 var builder = WebApplication.CreateBuilder(args);
 

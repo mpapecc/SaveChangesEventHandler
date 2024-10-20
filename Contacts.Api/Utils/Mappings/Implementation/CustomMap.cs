@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using Contacts.Api.Utils.Mappings.Abstraction;
+using SaveChangesEventHandlers.Example.Utils.Mappings.Abstraction;
 
-namespace Contacts.Api.Utils.Mappings.Implementation
+namespace SaveChangesEventHandlers.Example.Utils.Mappings.Implementation
 {
     public class CustomMap : ICustomMap
     {

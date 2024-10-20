@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "Contacts.Api": {
+    "SaveChangesEventHandlers.Example": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

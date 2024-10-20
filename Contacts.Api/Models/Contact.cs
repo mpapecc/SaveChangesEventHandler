@@ -2,7 +2,7 @@
 using SaveChangesEventHandlers.Core.Abstraction;
 using System.ComponentModel.DataAnnotations;
 
-﻿namespace Contacts.Api.Models
+﻿namespace SaveChangesEventHandlers.Example.Models
 {
     public class Contact:BaseEntity, IEntity
     {

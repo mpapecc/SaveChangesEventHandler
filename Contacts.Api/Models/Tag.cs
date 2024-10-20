@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 ﻿using System.Text.Json.Serialization;
 
-namespace Contacts.Api.Models
+namespace SaveChangesEventHandlers.Example.Models
 {
     public class Tag:BaseEntity
     {

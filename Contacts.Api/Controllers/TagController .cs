@@ -1,12 +1,12 @@
-﻿using Contacts.Api.Dtos;
-using Contacts.Api.Models;
-using Contacts.Api.Repositories.Abstraction;
-using Contacts.Api.Services.Abstraction;
-using Contacts.Api.Utils.Mappings;
-using Contacts.Api.Utils.Mappings.Abstraction;
+﻿using SaveChangesEventHandlers.Example.Dtos;
+using SaveChangesEventHandlers.Example.Models;
+using SaveChangesEventHandlers.Example.Repositories.Abstraction;
+using SaveChangesEventHandlers.Example.Services.Abstraction;
+using SaveChangesEventHandlers.Example.Utils.Mappings;
+using SaveChangesEventHandlers.Example.Utils.Mappings.Abstraction;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Contacts.Api.Controllers
+namespace SaveChangesEventHandlers.Example.Controllers
 {
 
     public class TagController : BaseController<Tag,TagDto,TagDetailDto>

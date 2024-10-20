@@ -1,9 +1,9 @@
-﻿using Contacts.Api.Models;
-using Contacts.Api.Repositories.Abstraction;
-using Contacts.Api.Services.Abstraction;
+﻿using SaveChangesEventHandlers.Example.Models;
+using SaveChangesEventHandlers.Example.Repositories.Abstraction;
+using SaveChangesEventHandlers.Example.Services.Abstraction;
 using SaveChangesEventHandlers.Core.Abstraction;
 
-namespace Contacts.Api.SaveChangesEventsHandlers.Implementations
+namespace SaveChangesEventHandlers.Example.SaveChangesEventsHandlers.Implementations
 {
     public class ContactSaveChangesHandler : ISaveChangesHandler<Contact>
     {

@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Contacts.Api.Migrations
+namespace SaveChangesEventHandlers.Example.Migrations
 {
     public partial class altercontacttagtable : Migration
     {

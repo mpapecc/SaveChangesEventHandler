@@ -1,7 +1,7 @@
-﻿using Contacts.Api.Dtos;
-using Contacts.Api.Models;
+﻿using SaveChangesEventHandlers.Example.Dtos;
+using SaveChangesEventHandlers.Example.Models;
 
-namespace Contacts.Api.Services.Abstraction
+namespace SaveChangesEventHandlers.Example.Services.Abstraction
 {
     public interface IContactService
     {

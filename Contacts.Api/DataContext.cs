@@ -1,9 +1,9 @@
 ﻿using Autofac;
-using Contacts.Api.Models;
+using SaveChangesEventHandlers.Example.Models;
 using Microsoft.EntityFrameworkCore;
 using SaveChangesEventHandlers.Core.Abstraction;
 
-namespace Contacts.Api
+namespace SaveChangesEventHandlers.Example
 {
     public class DataContext : DbContext
     {
@@ -23,7 +23,7 @@ namespace Contacts.Api
 
         public override int SaveChanges()
         {
-            return  this.saveChangesEventsDispatcher.SaveChangesWithEventsDispatcher(this, base.SaveChanges);
+            return saveChangesEventsDispatcher.SaveChangesWithEventsDispatcher(this, base.SaveChanges);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -45,9 +45,9 @@ namespace Contacts.Api
 
             //Contacts
             modelBuilder.Entity<Contact>()
-                .HasMany(c=>c.Emails)
-                .WithOne(e=>e.Contact)
-                .HasForeignKey(c=>c.ContactId)
+                .HasMany(c => c.Emails)
+                .WithOne(e => e.Contact)
+                .HasForeignKey(c => c.ContactId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Contact>()
@@ -72,10 +72,10 @@ namespace Contacts.Api
             modelBuilder.Entity<Tag>()
                 .HasMany(t => t.ContactTags)
                 .WithOne(ct => ct.Tag)
-                .HasForeignKey(t=>t.TagId)
+                .HasForeignKey(t => t.TagId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            
+
         }
     }
 }

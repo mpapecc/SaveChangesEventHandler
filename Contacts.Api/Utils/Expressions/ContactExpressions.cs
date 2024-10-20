@@ -1,7 +1,7 @@
-﻿using Contacts.Api.Models;
+﻿using SaveChangesEventHandlers.Example.Models;
 using System.Linq.Expressions;
 
-namespace Contacts.Api.Utils.Expressions
+namespace SaveChangesEventHandlers.Example.Utils.Expressions
 {
     public static class ContactExpressions
     {

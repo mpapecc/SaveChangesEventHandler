@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Contacts.Api.Migrations
+namespace SaveChangesEventHandlers.Example.Migrations
 {
     public partial class Seed : Migration
     {

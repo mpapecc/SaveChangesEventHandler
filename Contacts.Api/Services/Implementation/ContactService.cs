@@ -1,16 +1,15 @@
-﻿using Autofac.Core;
-using Contacts.Api.Dtos;
-using Contacts.Api.Models;
-using Contacts.Api.Repositories.Abstraction;
-using Contacts.Api.Services.Abstraction;
-using Contacts.Api.Utils.Expressions;
-using Contacts.Api.Utils.Mappings;
-using Contacts.Api.Utils.Mappings.Abstraction;
-using Contacts.Api.Utils.Mappings.Implementation;
+﻿using SaveChangesEventHandlers.Example.Dtos;
+using SaveChangesEventHandlers.Example.Models;
+using SaveChangesEventHandlers.Example.Repositories.Abstraction;
+using SaveChangesEventHandlers.Example.Services.Abstraction;
+using SaveChangesEventHandlers.Example.Utils.Expressions;
+using SaveChangesEventHandlers.Example.Utils.Mappings;
+using SaveChangesEventHandlers.Example.Utils.Mappings.Abstraction;
+using SaveChangesEventHandlers.Example.Utils.Mappings.Implementation;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace Contacts.Api.Services.Implementation
+namespace SaveChangesEventHandlers.Example.Services.Implementation
 {
     public class ContactService : IContactService
     {

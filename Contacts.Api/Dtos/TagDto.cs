@@ -1,8 +1,8 @@
-﻿using Contacts.Api.Models;
+﻿using SaveChangesEventHandlers.Example.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Contacts.Api.Dtos
+namespace SaveChangesEventHandlers.Example.Dtos
 {
     public class TagDto
     {
