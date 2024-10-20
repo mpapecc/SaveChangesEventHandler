@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contacts.Api", "Contacts.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaveChangesEventHandlers.Core", "SaveChangesEventHandlers.Core\SaveChangesEventHandlers.Core.csproj", "{9B56F83C-7BB2-47B7-BEFC-7B454436254F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaveChangesEventsHandler.Test", "SaveChangesEventsHandler.Test\SaveChangesEventsHandler.Test.csproj", "{0DB998B0-28FE-4E5E-94AA-7D39744150E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9B56F83C-7BB2-47B7-BEFC-7B454436254F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B56F83C-7BB2-47B7-BEFC-7B454436254F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B56F83C-7BB2-47B7-BEFC-7B454436254F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DB998B0-28FE-4E5E-94AA-7D39744150E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DB998B0-28FE-4E5E-94AA-7D39744150E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DB998B0-28FE-4E5E-94AA-7D39744150E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DB998B0-28FE-4E5E-94AA-7D39744150E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
