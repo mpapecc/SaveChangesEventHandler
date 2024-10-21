@@ -27,6 +27,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
         {
             using(var scope = new TransactionScope())
             {
+                dbContext.ChangeTracker.DetectChanges();
                 ProccessEntitesForBeforeActions(dbContext);
 
                 //TODO: suport save changes iterations
