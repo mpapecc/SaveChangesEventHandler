@@ -1,7 +1,7 @@
-﻿using Autofac;
-using SaveChangesEventHandlers.Example.Models;
+﻿using SaveChangesEventHandlers.Example.Models;
 using Microsoft.EntityFrameworkCore;
 using SaveChangesEventHandlers.Core.Abstraction;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace SaveChangesEventHandlers.Example
 {
@@ -25,6 +25,7 @@ namespace SaveChangesEventHandlers.Example
         {
             return saveChangesEventsDispatcher.SaveChangesWithEventsDispatcher(this, base.SaveChanges);
         }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -77,5 +78,6 @@ namespace SaveChangesEventHandlers.Example
 
 
         }
+
     }
 }

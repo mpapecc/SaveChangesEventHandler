@@ -9,19 +9,29 @@ namespace SaveChangesEventHandlers.Example.SaveChangesEventsHandlers.Implementat
     {
         private readonly ILogger<ContactSaveChangesHandler> logger;
         private readonly IBaseRepository<Contact> contactRepository;
+        private readonly IBaseRepository<Email> emailRepository;
+
         private readonly IContactService contactService;
 
         public ContactSaveChangesHandler(
             ILogger<ContactSaveChangesHandler> logger, 
             IBaseRepository<Contact> contactRepository,
+            IBaseRepository<Email> emailRepository,
             IContactService contactService)
         {
             this.logger = logger;
             this.contactRepository = contactRepository;
+            this.emailRepository = emailRepository;
             this.contactService = contactService;
         }
         public void AfterNewPersisted(Contact entity)
         {
+            var email = new Email()
+            {
+                Value = "alooo@bremacinieee.com",
+                ContactId = entity.Id,
+            };
+            this.emailRepository.Add(email);
             this.logger.LogInformation("after contact is persisted");
         }
 
@@ -31,14 +41,12 @@ namespace SaveChangesEventHandlers.Example.SaveChangesEventsHandlers.Implementat
                 throw new InvalidDataException("Address cna not be sucidar");
             entity.FirstName = "alo bree";
 
-            var contact = new Contact()
+            var email = new Email() 
             {
-                FirstName = entity.FirstName,
-                LastName = entity.LastName,
-                Address = entity.Address,
-                IsBookmarked = entity.IsBookmarked
+                Value = "alooo@breeee.com",
+                ContactId = entity.Id,
             };
-            this.contactRepository.Add(contact);    
+            this.emailRepository.Add(email);    
             this.logger.LogInformation("before contact is persisted");
         }
 

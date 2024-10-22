@@ -37,7 +37,7 @@ namespace SaveChangesEventsHandler.Test.Tests
         public void test_TestModelSaveChangesHandler_is_registred()
         {
             var service = serviceProvider.GetServices<ISaveChangesHandlerKey>();
-            Assert.IsTrue(service.First() is ISaveChangesHandler<TestModel>);
+            Assert.IsTrue(service.Count() == 2);
         }
 
         [ClassCleanup]

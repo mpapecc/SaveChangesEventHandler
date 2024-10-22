@@ -9,6 +9,7 @@ namespace SaveChangesEventsHandler.Test.TestData
 {
     public class TestModelSaveChangesHandler : ISaveChangesHandler<TestModel>
     {
+
         public void AfterDelete(TestModel entity)
         {
         }

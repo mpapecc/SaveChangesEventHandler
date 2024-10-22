@@ -1,5 +1,4 @@
-﻿using SaveChangesEventHandlers.Example.Repositories.Abstraction;
-using SaveChangesEventHandlers.Example.Models;
+﻿using SaveChangesEventHandlers.Example.Models;
 using SaveChangesEventHandlers.Core.Abstraction;
 
 namespace SaveChangesEventHandlers.Example.SaveChangesEventsHandlers.Implementations

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 ﻿namespace SaveChangesEventHandlers.Example.Models
 {
-    public class Contact:BaseEntity, IEntity
+    public class Contact:BaseEntity, ISoftDeletableEntity
     {
         [Required]
         [MaxLength(200)]
@@ -20,6 +20,7 @@ using System.ComponentModel.DataAnnotations;
         public List<ContactTag> ContactTags { get; set; } = new List<ContactTag>();
         public List<Email> Emails { get; set; } = new List<Email>();
         public List<Number> Numbers { get; set; } = new List<Number>();
+        public bool IsSoftDeleted { get; set; } = false;
     }
 
     public class ContactValidator : AbstractValidator<Contact>

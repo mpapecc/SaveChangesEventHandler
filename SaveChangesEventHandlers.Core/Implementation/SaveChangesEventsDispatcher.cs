@@ -1,22 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SaveChangesEventHandlers.Core.Abstraction;
-using System.Reflection;
 using System.Transactions;
 
 namespace SaveChangesEventHandlers.Core.Implemention
 {
     public class SaveChangesEventsDispatcher : ISaveChangesEventsDispatcher
     {
-        private readonly SaveChangesEventsProvider saveChangesEventsProvider;
-        public Dictionary<Type, ISaveChangesHandlerKey> saveChangesEvents = new();
+        private Dictionary<EntityState, List<EntityEntry>> entitesForAfterProcessing { get; set; } = new()
+        {
+            {EntityState.Added, new() },
+            {EntityState.Modified, new() },
+            {EntityState.Deleted, new() }
+        };
 
-        private IEnumerable<EntityEntry> forUpdate { get; set; } = new List<EntityEntry>();
-        private IEnumerable<EntityEntry> forDelete { get; set; } = new List<EntityEntry>() ;
-        private IEnumerable<EntityEntry> forAdd { get; set; } = new List<EntityEntry>() ;
-        private IEnumerable<EntityEntry> passToAfterAdd { get; set; } = new List<EntityEntry>();
-        private IEnumerable<EntityEntry> passToAfterUpdate { get; set; } = new List<EntityEntry>();
-        private IEnumerable<EntityEntry> passToAfterDelete { get; set; } = new List<EntityEntry>();
+        private Dictionary<object, EntityState> processedEntities { get; set; } = new();
+
+        private readonly SaveChangesEventsProvider saveChangesEventsProvider;
 
         public SaveChangesEventsDispatcher(SaveChangesEventsProvider saveChangesEventsProvider)
         {
@@ -28,70 +28,121 @@ namespace SaveChangesEventHandlers.Core.Implemention
             using(var scope = new TransactionScope())
             {
                 dbContext.ChangeTracker.DetectChanges();
-                ProccessEntitesForBeforeActions(dbContext);
 
-                //TODO: suport save changes iterations
-                DispatchBefore();
+                var shouldTriggerSaveChangesAgain = false;
+                var shouldTriggerBeforeDispatcherAgain = false;
+                var savedEntites = 0;
+                var entities = new List<EntityEntry>();
 
-                ProccessEntitesForAfterActions(dbContext);
+                do
+                {
+                    shouldTriggerBeforeDispatcherAgain = false;
+                    shouldTriggerSaveChangesAgain = false;
 
-                var savedEntites = saveChanges.Invoke();
+                    do
+                    {
+                        entities = dbContext.ChangeTracker.Entries().FilterUnprocessedEntries(this.processedEntities).ToList();
 
-                DispatchAfter();
+                        shouldTriggerBeforeDispatcherAgain = false;
+
+                        if (entities.Any())
+                        {
+                            shouldTriggerBeforeDispatcherAgain = true;
+
+                            DispatchBefore(entities);
+                        }
+
+                        ProcessEntriesForAfterActions(entities);
+
+                    } while (shouldTriggerBeforeDispatcherAgain);
+
+                    savedEntites += saveChanges.Invoke();
+
+                    DispatchAfter(this.entitesForAfterProcessing);
+
+                    ClearEntitesForAfterActions();
+
+                    shouldTriggerSaveChangesAgain = dbContext.ChangeTracker.Entries().FilterUnprocessedEntries(this.processedEntities).Any();
+
+                } while (shouldTriggerSaveChangesAgain);
+
                 scope.Complete();
+
                 return savedEntites;
             }
         }
 
-        public void DispatchAfter()
+        public void DispatchBefore(List<EntityEntry> entites)
         {
+            if (entites.Any(e => e.State == EntityState.Added))
+            {
+                InvokeNewActionForEntites(entites.Where(e => e.State == EntityState.Added), nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
+            }
 
-            InvokeNewActionForEntites(this.passToAfterAdd, nameof(ISaveChangesHandler<IEntity>.AfterNewPersisted));
+            if (entites.Any(e => e.State == EntityState.Modified))
+            {
+                InvokeUpdateActionForEntites(entites.Where(e => e.State == EntityState.Modified), nameof(ISaveChangesHandler<IEntity>.BeforeUpdate));
+            }
 
-            InvokeUpdateActionForEntites(this.passToAfterUpdate, nameof(ISaveChangesHandler<IEntity>.AfterUpdate));
+            if (entites.Any(e => e.State == EntityState.Deleted))
+            {
+                InvokeDeleteActionForEntites(entites.Where(e => e.State == EntityState.Deleted), nameof(ISaveChangesHandler<IEntity>.BeforeDelete));
+            }
 
-            InvokeNewActionForEntites(this.passToAfterDelete, nameof(ISaveChangesHandler<IEntity>.AfterDelete));
+            entites.ToList().ForEach(e => this.processedEntities.Add(e.Entity, e.State));
         }
 
-        public void DispatchBefore()
+        private void ProcessEntriesForAfterActions(List<EntityEntry> entities)
         {
-            InvokeNewActionForEntites(this.forAdd, nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
+            var processedEntitiesTempForAfter = new EntityEntry[entities.Count];
 
-            InvokeUpdateActionForEntites(this.forUpdate, nameof(ISaveChangesHandler<IEntity>.BeforeUpdate));
+            entities.ToList().CopyTo(processedEntitiesTempForAfter);
 
-            InvokeNewActionForEntites(this.forDelete, nameof(ISaveChangesHandler<IEntity>.BeforeDelete));
+            entities.GroupBy(e => e.State).ToList().ForEach(es =>
+            {
+                switch (es.Key)
+                {
+                    case EntityState.Deleted:
+                    case EntityState.Modified:
+                    case EntityState.Added:
+                        this.entitesForAfterProcessing[es.Key].AddRange(es);
+                        break;
+                    default:
+                        break;
+                }
+            });
         }
 
-        public void ProccessEntitesForBeforeActions(DbContext dbContext)
+        public void DispatchAfter(Dictionary<EntityState, List<EntityEntry>> entitesPerState)
         {
-            this.forUpdate = dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Modified);
-            this.forDelete = dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Deleted);
-            this.forAdd = dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Added);
+            if (entitesPerState[EntityState.Added].Any())
+            {
+                InvokeNewActionForEntites(entitesPerState[EntityState.Added], nameof(ISaveChangesHandler<IEntity>.AfterNewPersisted));
+            }
+
+            if (entitesPerState[EntityState.Modified].Any())
+            {
+                InvokeUpdateActionForEntites(entitesPerState[EntityState.Modified], nameof(ISaveChangesHandler<IEntity>.AfterUpdate));
+            }
+
+            if (entitesPerState[EntityState.Deleted].Any())
+            {
+                InvokeDeleteActionForEntites(entitesPerState[EntityState.Deleted], nameof(ISaveChangesHandler<IEntity>.AfterDelete));
+            }
         }
 
-        public void ProccessEntitesForAfterActions(DbContext dbContext)
+        private void ClearEntitesForAfterActions()
         {
-            var passToAfterAddTempArray = new EntityEntry[this.forAdd.Count()];
-            var passToAfterUpdateTempArray = new EntityEntry[this.forUpdate.Count()];
-            var passToAfterDeleteTempArray = new EntityEntry[this.forDelete.Count()];
-
-            this.forAdd.ToList().CopyTo(passToAfterAddTempArray);
-            this.forUpdate.ToList().CopyTo(passToAfterUpdateTempArray);
-            this.forDelete.ToList().CopyTo(passToAfterDeleteTempArray);
-
-            var passToAfterAddTempList = passToAfterAddTempArray.ToList();
-            var passToAfterUpdateTempList = passToAfterUpdateTempArray.ToList();
-            var passToAfterDeleteTempList = passToAfterUpdateTempArray.ToList();
-
-            this.passToAfterAdd = passToAfterAddTempList.Where(entity => entity != null);
-            this.passToAfterUpdate = passToAfterUpdateTempList.Where(entity => entity != null);
-            this.passToAfterDelete = passToAfterDeleteTempList.Where(entity => entity != null);
+            foreach (var kvp in this.entitesForAfterProcessing)
+            {
+                kvp.Value.Clear();
+            }
         }
 
-        public void InvokeNewActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
+        private void InvokeNewActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
         {
 
-            if (entities != null)
+            if (entities.Any())
             {
                 foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
                 {
@@ -115,9 +166,10 @@ namespace SaveChangesEventHandlers.Core.Implemention
             }
         }
 
-        public void InvokeUpdateActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
+        private void InvokeDeleteActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
         {
-            if (entities != null)
+
+            if (entities.Any())
             {
                 foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
                 {
@@ -128,7 +180,41 @@ namespace SaveChangesEventHandlers.Core.Implemention
                         foreach (var entity in item)
                         {
                             var newValues = entity.CurrentValues.ToObject();
-                            var oldValues = entity.GetDatabaseValues().ToObject(); // find way not to check on db
+
+                            if(newValues is ISoftDeletableEntity)
+                            {
+                                ISoftDeletableEntity a = newValues as ISoftDeletableEntity;
+                                a.IsSoftDeleted = true;
+                                entity.CurrentValues.SetValues(a);
+                                entity.State = EntityState.Modified;
+                            }
+
+                            object[] arguments = new object[] { newValues };
+
+                            var method = handler.GetType().GetMethod(methodName);
+                            method?.Invoke(handler, arguments);
+
+                            entity.CurrentValues.SetValues(arguments[0]);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void InvokeUpdateActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
+        {
+            if (entities.Any())
+            {
+                foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
+                {
+                    var handler = this.saveChangesEventsProvider.GetServiceHandlerForType(item.Key);
+
+                    if (handler != null)
+                    {
+                        foreach (var entity in item)
+                        {
+                            var newValues = entity.CurrentValues.ToObject();
+                            var oldValues = entity.OriginalValues.ToObject();
 
                             object[] arguments = new object[] { oldValues, newValues };
 
@@ -140,6 +226,15 @@ namespace SaveChangesEventHandlers.Core.Implemention
                     }
                 }
             }
+        }
+    }
+
+    public static class EntityEntryExtensions
+    {
+        public static IEnumerable<EntityEntry> FilterUnprocessedEntries(this IEnumerable<EntityEntry> entries, Dictionary<object, EntityState> processedEntities)
+        {
+            return entries.Where(e => e.State != EntityState.Detached && e.State != EntityState.Unchanged)
+                                            .Where(e => !processedEntities.ContainsKey(e.Entity));
         }
     }
 }

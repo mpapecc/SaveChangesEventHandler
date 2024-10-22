@@ -1,10 +1,11 @@
 ﻿using FluentValidation;
+using SaveChangesEventHandlers.Core.Abstraction;
 using System.ComponentModel.DataAnnotations;
 ﻿using System.Text.Json.Serialization;
 
 namespace SaveChangesEventHandlers.Example.Models
 {
-    public class Tag:BaseEntity
+    public class Tag:BaseEntity, IEntity
     {
         [MaxLength(200)]
         public string Value { get; set; }

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace SaveChangesEventHandlers.Example.Models
 {
-    public class Email:BaseEntity, IEntity
+    public class Email:BaseEntity, ISoftDeletableEntity
     {
         [Required]
         [MaxLength(200)]
@@ -12,5 +12,6 @@ namespace SaveChangesEventHandlers.Example.Models
         public Guid ContactId { get; set; }
         [JsonIgnore]
         public Contact? Contact { get; set; }
+        public bool IsSoftDeleted { get; set; } = false;
     }
 }

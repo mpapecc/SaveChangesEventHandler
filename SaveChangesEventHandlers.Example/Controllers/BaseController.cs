@@ -55,8 +55,9 @@ namespace SaveChangesEventHandlers.Example.Controllers
             if (id != data.Id)
                 return BadRequest();
 
-
             _baseRepository.Update(data);
+            _baseRepository.Commit();
+
             return Ok(data);
         }
 
@@ -64,6 +65,7 @@ namespace SaveChangesEventHandlers.Example.Controllers
         public virtual IActionResult Delete(Guid id)
         {
             _baseRepository.Delete(id);
+            _baseRepository.Commit();
             return Ok();
         }
     }
