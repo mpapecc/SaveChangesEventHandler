@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SaveChangesEventHandlers.Core.Abstraction;
+using SaveChangesEventHandlers.Core.Abstraction.Entities;
 using System.Transactions;
+using SaveChangesEventHandlers.Core.Extensions;
 
 namespace SaveChangesEventHandlers.Core.Implemention
 {
@@ -14,7 +16,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
             {EntityState.Deleted, new() }
         };
 
-        private Dictionary<object, EntityState> processedEntities { get; set; } = new();
+        private Dictionary<object, EntityState> processedEntities { get; set; } = [];
 
         private readonly SaveChangesEventsProvider saveChangesEventsProvider;
 
@@ -23,11 +25,11 @@ namespace SaveChangesEventHandlers.Core.Implemention
             this.saveChangesEventsProvider = saveChangesEventsProvider;
         }
 
-        public int SaveChangesWithEventsDispatcher(DbContext dbContext, Func<int> saveChanges)
+        public int SaveChangesWithEventsDispatcher(SaveChangesEventDbContext dbContext, Func<int> saveChanges)
         {
             using(var scope = new TransactionScope())
             {
-                dbContext.ChangeTracker.DetectChanges();
+                //dbContext.ChangeTracker.DetectChanges();
 
                 var shouldTriggerSaveChangesAgain = false;
                 var shouldTriggerBeforeDispatcherAgain = false;
@@ -41,7 +43,20 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
                     do
                     {
-                        entities = dbContext.ChangeTracker.Entries().FilterUnprocessedEntries(this.processedEntities).ToList();
+                        entities = dbContext.ChangeTracker.Entries()
+                            .FilterUnprocessedEntries(this.processedEntities)
+                            .SetEmptyCollectionProperties()
+                            .ToList();
+
+                        foreach (var item in entities)
+                        {
+                            var aas = dbContext.EntitesForUpdate.TryGetValue(item.Entity, out object originalVallue);
+
+                            var eee = originalVallue;
+
+                        }
+
+                        dbContext.ChangeTracker.DetectChanges();
 
                         shouldTriggerBeforeDispatcherAgain = false;
 
@@ -141,27 +156,22 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
         private void InvokeNewActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
         {
-
-            if (entities.Any())
+            foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
             {
-                foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
+                var handler = this.saveChangesEventsProvider.GetServiceHandlerForType(item.Key);
+
+                if (handler == null)
                 {
-                    var handler = this.saveChangesEventsProvider.GetServiceHandlerForType(item.Key);
+                    continue;
+                }
 
-                    if (handler != null)
-                    {
-                        foreach (var entity in item)
-                        {
-                            var newValues = entity.CurrentValues.ToObject();
+                foreach (var entity in item)
+                {
+                    object[] arguments = [entity.Entity];
 
-                            object[] arguments = new object[] { newValues };
-
-                            var method = handler.GetType().GetMethod(methodName);
-                            method?.Invoke(handler, arguments);
-
-                            entity.CurrentValues.SetValues(arguments[0]);
-                        }
-                    }
+                    var method = handler.GetType().GetMethod(methodName);
+                    
+                    method?.Invoke(handler, arguments);
                 }
             }
         }
@@ -179,7 +189,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
                     {
                         foreach (var entity in item)
                         {
-                            var newValues = entity.CurrentValues.ToObject();
+                            var newValues = entity.Entity;
 
                             if(newValues is ISoftDeletableEntity)
                             {
@@ -203,38 +213,27 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
         private void InvokeUpdateActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
         {
-            if (entities.Any())
+            foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
             {
-                foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
+                var handler = this.saveChangesEventsProvider.GetServiceHandlerForType(item.Key);
+
+                if (handler == null)
                 {
-                    var handler = this.saveChangesEventsProvider.GetServiceHandlerForType(item.Key);
+                    continue;
+                }
 
-                    if (handler != null)
-                    {
-                        foreach (var entity in item)
-                        {
-                            var newValues = entity.CurrentValues.ToObject();
-                            var oldValues = entity.OriginalValues.ToObject();
+                foreach (var entity in item)
+                {
+                    var oldValuesFull = entity.CreateOriginalObjectWithAllProperties();
 
-                            object[] arguments = new object[] { oldValues, newValues };
+                    object[] arguments = [oldValuesFull, entity.Entity];
 
-                            var method = handler.GetType().GetMethod(methodName);
-                            method?.Invoke(handler, arguments);
+                    var method = handler.GetType().GetMethod(methodName);
+                    method?.Invoke(handler, arguments);
 
-                            entity.CurrentValues.SetValues(arguments[1]);
-                        }
-                    }
+                    entity.CurrentValues.SetValues(arguments[1]);
                 }
             }
-        }
-    }
-
-    public static class EntityEntryExtensions
-    {
-        public static IEnumerable<EntityEntry> FilterUnprocessedEntries(this IEnumerable<EntityEntry> entries, Dictionary<object, EntityState> processedEntities)
-        {
-            return entries.Where(e => e.State != EntityState.Detached && e.State != EntityState.Unchanged)
-                                            .Where(e => !processedEntities.ContainsKey(e.Entity));
         }
     }
 }

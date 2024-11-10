@@ -7,6 +7,6 @@ namespace SaveChangesEventHandlers.Core.Abstraction
     {
         void DispatchBefore(List<EntityEntry> entites);
         void DispatchAfter(Dictionary<EntityState, List<EntityEntry>> entitiesPerState );
-        int SaveChangesWithEventsDispatcher(DbContext dbContext, Func<int> saveChanges);
+        int SaveChangesWithEventsDispatcher(SaveChangesEventDbContext dbContext, Func<int> saveChanges);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using SaveChangesEventHandlers.Core.Abstraction;
+using SaveChangesEventHandlers.Core.Abstraction.Entities;
 using System.ComponentModel.DataAnnotations;
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SaveChangesEventHandlers.Example.Models
 {

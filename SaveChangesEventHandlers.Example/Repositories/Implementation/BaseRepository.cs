@@ -1,7 +1,5 @@
 ﻿using SaveChangesEventHandlers.Example.Models;
 using SaveChangesEventHandlers.Example.Repositories.Abstraction;
-using Microsoft.EntityFrameworkCore;
-using SaveChangesEventHandlers.Example;
 
 namespace SaveChangesEventHandlers.Example.Repositories.Implementation
 {

@@ -1,4 +1,6 @@
-﻿namespace SaveChangesEventHandlers.Core.Abstraction
+﻿using SaveChangesEventHandlers.Core.Abstraction.Entities;
+
+namespace SaveChangesEventHandlers.Core.Abstraction
 {
     public interface ISoftDeletableEntity : IEntity
     {

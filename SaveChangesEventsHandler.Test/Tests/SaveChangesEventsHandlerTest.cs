@@ -1,17 +1,16 @@
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SaveChangesEventHandlers.Core;
 using SaveChangesEventHandlers.Core.Abstraction;
+using SaveChangesEventHandlers.Core.Abstraction.Entities;
 using SaveChangesEventsHandler.Test.Helpers;
-using SaveChangesEventsHandler.Test.TestData;
+using SaveChangesEventsHandler.Test.TestData.Entites;
 
 namespace SaveChangesEventsHandler.Test.Tests
 {
     [TestClass]
     public class SaveChangesEventsHandlerTest
     {
-
         [TestMethod]
         public async Task test_BeforeNewPersisted()
         {
@@ -60,7 +59,11 @@ namespace SaveChangesEventsHandler.Test.Tests
                 {
                     var u = await context.TestModels.FirstOrDefaultAsync(testModel => testModel.FirstName == nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
                     u.FirstName = nameof(TestModel);
-                    context.TestModels.Update(u);
+                    u.TestModelNavigations = new List<TestModelNavigation>()
+                        {
+                            new TestModelNavigation() { LastName = "Mile"}
+                        };
+                    //context.TestModels.Update(u);
 
                     context.SaveChanges();
                 }
@@ -76,5 +79,42 @@ namespace SaveChangesEventsHandler.Test.Tests
             }
         }
 
+        [TestMethod]
+        public async Task test_BeforeNewPersistedWithNavigationCollection()
+        {
+            var serviceCollection = new ServiceCollection();
+            var services = serviceCollection.AddSaveChangesInfrastructure();
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            using (var factory = new TestDbContextFactory(serviceProvider.GetRequiredService<ISaveChangesEventsDispatcher>()))
+            {
+                using (var context = factory.CreateContext())
+                {
+                    var testModel = new TestModel()
+                    {
+                        FirstName = nameof(test_BeforeNewPersisted),
+                        TestModelNavigations = new List<TestModelNavigation>()
+                        {
+                            new TestModelNavigation() { LastName = "Mile"},
+                            new TestModelNavigation() { LastName = "Milanezi"}
+                        }
+                    };
+
+                    context.TestModels.Add(testModel);
+                    context.SaveChanges();
+                }
+
+                using (var context = factory.CreateContext())
+                {
+                    var count = context.TestModels.ToList();
+
+                    //var count = await context.TestModels.CountAsync();
+                    //Assert.AreEqual(1, count);
+
+                    //var u = await context.TestModels.FirstOrDefaultAsync(testModel => testModel.FirstName == nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
+                    //Assert.IsNotNull(u);
+                }
+            }
+        }
     }
 }

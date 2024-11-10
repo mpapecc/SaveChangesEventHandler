@@ -1,4 +1,5 @@
 ﻿using SaveChangesEventHandlers.Core.Abstraction;
+using SaveChangesEventsHandler.Test.TestData.Entites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,7 @@ namespace SaveChangesEventsHandler.Test.TestData
 
         public void BeforeNewPersisted(TestModelNavigation entity)
         {
+            entity.LastName = "editeddd";
         }
 
         public void BeforeUpdate(TestModelNavigation oldEntity, TestModelNavigation newEntity)
