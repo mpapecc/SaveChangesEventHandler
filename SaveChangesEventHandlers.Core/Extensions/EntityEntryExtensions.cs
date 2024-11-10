@@ -9,7 +9,7 @@ namespace SaveChangesEventHandlers.Core.Extensions
         public static IEnumerable<EntityEntry> FilterUnprocessedEntries(this IEnumerable<EntityEntry> entries, Dictionary<object, EntityState> processedEntities)
         {
             return entries.Where(e => e.State != EntityState.Detached && e.State != EntityState.Unchanged)
-                                            .Where(e => !processedEntities.ContainsKey(e.Entity));
+                          .Where(e => !processedEntities.ContainsKey(e.Entity));
         }
 
         public static object CreateOriginalObjectWithAllProperties(this EntityEntry entity)

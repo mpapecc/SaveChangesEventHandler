@@ -1,15 +1,15 @@
 ﻿using SaveChangesEventHandlers.Example.Models;
 using Microsoft.EntityFrameworkCore;
 using SaveChangesEventHandlers.Core.Abstraction;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace SaveChangesEventHandlers.Example
 {
-    public class DataContext : DbContext
+    public class DataContext : SaveChangesEventDbContext
     {
         private readonly ISaveChangesEventsDispatcher saveChangesEventsDispatcher;
 
-        public DataContext(DbContextOptions<DataContext> options, ISaveChangesEventsDispatcher saveChangesEventsDispatcher) : base(options)
+        public DataContext(DbContextOptions<DataContext> options, ISaveChangesEventsDispatcher saveChangesEventsDispatcher) 
+            : base(options, saveChangesEventsDispatcher)
         {
             this.saveChangesEventsDispatcher = saveChangesEventsDispatcher;
         }

@@ -19,7 +19,6 @@ namespace SaveChangesEventsHandler.Test.TestData
             modelBuilder.ApplyConfiguration(new TestModelEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TestModelNavigationEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
-
         }
     }
 }
