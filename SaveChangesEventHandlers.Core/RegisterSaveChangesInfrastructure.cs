@@ -22,8 +22,8 @@ namespace SaveChangesEventHandlers.Core
             .ForEach(assembly =>
             {
                 assembly.GetTypes().Where(type => typeof(ISaveChangesHandlerKey).IsAssignableFrom(type) && !type.IsInterface)
-                .ToList()
-                .ForEach(type => services.AddScoped(typeof(ISaveChangesHandlerKey), type));
+                                    .ToList()
+                                    .ForEach(type => services.AddScoped(typeof(ISaveChangesHandlerKey), type));
             });
         }
     }

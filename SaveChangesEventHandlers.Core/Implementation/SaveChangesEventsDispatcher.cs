@@ -178,35 +178,33 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
         private void InvokeDeleteActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
         {
-
-            if (entities.Any())
+            foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
             {
-                foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
+                var handler = this.saveChangesEventsProvider.GetServiceHandlerForType(item.Key);
+
+                if (handler == null)
                 {
-                    var handler = this.saveChangesEventsProvider.GetServiceHandlerForType(item.Key);
+                    continue;
+                }
 
-                    if (handler != null)
+                foreach (var entity in item)
+                {
+                    var newValues = entity.Entity;
+
+                    if (newValues is ISoftDeletableEntity)
                     {
-                        foreach (var entity in item)
-                        {
-                            var newValues = entity.Entity;
-
-                            if(newValues is ISoftDeletableEntity)
-                            {
-                                ISoftDeletableEntity a = newValues as ISoftDeletableEntity;
-                                a.IsSoftDeleted = true;
-                                entity.CurrentValues.SetValues(a);
-                                entity.State = EntityState.Modified;
-                            }
-
-                            object[] arguments = new object[] { newValues };
-
-                            var method = handler.GetType().GetMethod(methodName);
-                            method?.Invoke(handler, arguments);
-
-                            entity.CurrentValues.SetValues(arguments[0]);
-                        }
+                        ISoftDeletableEntity a = newValues as ISoftDeletableEntity;
+                        a.IsSoftDeleted = true;
+                        entity.CurrentValues.SetValues(a);
+                        entity.State = EntityState.Modified;
                     }
+
+                    object[] arguments = [newValues];
+
+                    var method = handler.GetType().GetMethod(methodName);
+                    method?.Invoke(handler, arguments);
+
+                    entity.CurrentValues.SetValues(arguments[0]);
                 }
             }
         }

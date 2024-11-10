@@ -45,19 +45,5 @@ namespace SaveChangesEventHandlers.Example.Controllers
             _contactService.Update(id, record);
             return  Ok(record);
         }
-
-        [HttpPut("UpdateHandler/{id}")]
-        public IActionResult UpdateHandler(Guid id, string name)
-        {
-
-            var contact = this.contactRepository.GetById(id).First();
-
-            contact.FirstName = name;
-
-            this.contactRepository.Update(contact);
-
-            return Ok(contact);
-        }
-
     }
 }

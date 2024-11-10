@@ -24,7 +24,7 @@ namespace SaveChangesEventsHandler.Test.Tests
                 {
                     var testModel = new TestModel() { FirstName = nameof(test_BeforeNewPersisted) };
                     context.TestModels.Add(testModel);
-                    context.SaveChanges();
+                    context.SaveChangesWithEventHandlers();
                 }
 
                 using (var context = factory.CreateContext())
@@ -52,7 +52,7 @@ namespace SaveChangesEventsHandler.Test.Tests
                     var testModel = new TestModel() { FirstName = nameof(test_BeforeUpdate) };
                     context.TestModels.Add(testModel);
 
-                    context.SaveChanges();
+                    context.SaveChangesWithEventHandlers();
                 }
 
                 using (var context = factory.CreateContext())
@@ -63,9 +63,10 @@ namespace SaveChangesEventsHandler.Test.Tests
                         {
                             new TestModelNavigation() { LastName = "Mile"}
                         };
-                    //context.TestModels.Update(u);
 
-                    context.SaveChanges();
+                    context.TestModels.Update(u);
+
+                    context.SaveChangesWithEventHandlers();
                 }
 
                 using (var context = factory.CreateContext())
@@ -101,18 +102,17 @@ namespace SaveChangesEventsHandler.Test.Tests
                     };
 
                     context.TestModels.Add(testModel);
-                    context.SaveChanges();
+                    context.SaveChangesWithEventHandlers();
                 }
 
                 using (var context = factory.CreateContext())
                 {
-                    var count = context.TestModels.ToList();
 
-                    //var count = await context.TestModels.CountAsync();
-                    //Assert.AreEqual(1, count);
+                    var count = await context.TestModels.CountAsync();
+                    Assert.AreEqual(1, count);
 
-                    //var u = await context.TestModels.FirstOrDefaultAsync(testModel => testModel.FirstName == nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
-                    //Assert.IsNotNull(u);
+                    var u = await context.TestModels.FirstOrDefaultAsync(testModel => testModel.FirstName == nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
+                    Assert.IsNotNull(u);
                 }
             }
         }

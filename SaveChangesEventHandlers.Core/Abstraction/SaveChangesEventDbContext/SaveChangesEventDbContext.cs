@@ -13,7 +13,7 @@ namespace SaveChangesEventHandlers.Core.Abstraction
             this.saveChangesEventsDispatcher = saveChangesEventsDispatcher;
         }
 
-        public new virtual int SaveChanges()
+        public virtual int SaveChangesWithEventHandlers()
         {
             return this.saveChangesEventsDispatcher.SaveChangesWithEventsDispatcher(this, base.SaveChanges);
         }
