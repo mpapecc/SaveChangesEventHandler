@@ -45,7 +45,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
                     {
                         entities = dbContext.ChangeTracker.Entries()
                             .FilterUnprocessedEntries(this.processedEntities)
-                            .SetEmptyCollectionProperties()
+                            .SetEmptyEntityEntryCollectionProperties()
                             .ToList();
 
                         foreach (var item in entities)
@@ -64,7 +64,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
                         {
                             shouldTriggerBeforeDispatcherAgain = true;
 
-                            DispatchBefore(entities);
+                            DispatchBefore(entities, dbContext);
                         }
 
                         ProcessEntriesForAfterActions(entities);
@@ -73,7 +73,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
                     savedEntites += saveChanges.Invoke();
 
-                    DispatchAfter(this.entitesForAfterProcessing);
+                    DispatchAfter(this.entitesForAfterProcessing, dbContext);
 
                     ClearEntitesForAfterActions();
 
@@ -87,7 +87,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
             }
         }
 
-        public void DispatchBefore(List<EntityEntry> entites)
+        public void DispatchBefore(List<EntityEntry> entites, SaveChangesEventDbContext dbContext)
         {
             if (entites.Any(e => e.State == EntityState.Added))
             {
@@ -96,7 +96,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
             if (entites.Any(e => e.State == EntityState.Modified))
             {
-                InvokeUpdateActionForEntites(entites.Where(e => e.State == EntityState.Modified), nameof(ISaveChangesHandler<IEntity>.BeforeUpdate));
+                InvokeUpdateActionForEntites(entites.Where(e => e.State == EntityState.Modified), nameof(ISaveChangesHandler<IEntity>.BeforeUpdate), dbContext);
             }
 
             if (entites.Any(e => e.State == EntityState.Deleted))
@@ -128,7 +128,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
             });
         }
 
-        public void DispatchAfter(Dictionary<EntityState, List<EntityEntry>> entitesPerState)
+        public void DispatchAfter(Dictionary<EntityState, List<EntityEntry>> entitesPerState,SaveChangesEventDbContext dbContext)
         {
             if (entitesPerState[EntityState.Added].Any())
             {
@@ -137,7 +137,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
             if (entitesPerState[EntityState.Modified].Any())
             {
-                InvokeUpdateActionForEntites(entitesPerState[EntityState.Modified], nameof(ISaveChangesHandler<IEntity>.AfterUpdate));
+                InvokeUpdateActionForEntites(entitesPerState[EntityState.Modified], nameof(ISaveChangesHandler<IEntity>.AfterUpdate), dbContext);
             }
 
             if (entitesPerState[EntityState.Deleted].Any())
@@ -209,7 +209,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
             }
         }
 
-        private void InvokeUpdateActionForEntites(IEnumerable<EntityEntry> entities, string methodName)
+        private void InvokeUpdateActionForEntites(IEnumerable<EntityEntry> entities, string methodName, SaveChangesEventDbContext dbContext)
         {
             foreach (var item in entities.GroupBy(e => e.Metadata.ClrType))
             {
@@ -222,7 +222,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
                 foreach (var entity in item)
                 {
-                    var oldValuesFull = entity.CreateOriginalObjectWithAllProperties();
+                    var oldValuesFull = entity.GetOriginalObject(dbContext);
 
                     object[] arguments = [oldValuesFull, entity.Entity];
 

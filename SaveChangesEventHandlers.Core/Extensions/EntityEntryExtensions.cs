@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore;
 using SaveChangesEventHandlers.Core.Abstraction.Entities;
+using SaveChangesEventHandlers.Core.Abstraction;
 
 namespace SaveChangesEventHandlers.Core.Extensions
 {
@@ -12,26 +13,26 @@ namespace SaveChangesEventHandlers.Core.Extensions
                           .Where(e => !processedEntities.ContainsKey(e.Entity));
         }
 
-        public static object CreateOriginalObjectWithAllProperties(this EntityEntry entity)
+        public static object CreateOriginalObjectWithAllProperties(this EntityEntry entityEntry)
         {
             var originalValues = new Dictionary<string, object?>();
 
-            foreach (var item in entity.Collections)
+            foreach (var item in entityEntry.Collections)
             {
                 originalValues.Add(item.Metadata.Name, item.CurrentValue);
             }
 
-            foreach (var item in entity.References)
+            foreach (var item in entityEntry.References)
             {
                 originalValues.Add(item.Metadata.Name, item.CurrentValue);
             }
 
-            foreach (var item in entity.Properties)
+            foreach (var item in entityEntry.Properties)
             {
                 originalValues.Add(item.Metadata.Name, item.OriginalValue);
             }
 
-            var originalObject = Activator.CreateInstance(entity.Metadata.ClrType);
+            var originalObject = Activator.CreateInstance(entityEntry.Metadata.ClrType);
 
             foreach (var item in originalValues)
             {
@@ -41,10 +42,15 @@ namespace SaveChangesEventHandlers.Core.Extensions
             return originalObject;
         }
 
-        public static IEnumerable<EntityEntry> SetEmptyCollectionProperties(this IEnumerable<EntityEntry> entries)
+        public static object GetOriginalObject(this EntityEntry entityEntry, SaveChangesEventDbContext dbContext)
+        {
+            return dbContext.EntitesForUpdate[entityEntry.Entity];
+        }
+
+        public static IEnumerable<EntityEntry> SetEmptyEntityEntryCollectionProperties(this IEnumerable<EntityEntry> entityEntries)
         {
 
-            foreach(var entry in entries)
+            foreach(var entry in entityEntries)
             {
                 foreach (var property in entry.Collections)
                 {
@@ -57,7 +63,7 @@ namespace SaveChangesEventHandlers.Core.Extensions
                 }
             }
 
-            return entries;
+            return entityEntries;
         }
     }
 }
