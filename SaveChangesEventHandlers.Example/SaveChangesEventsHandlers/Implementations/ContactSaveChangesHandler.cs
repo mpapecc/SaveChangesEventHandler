@@ -60,8 +60,6 @@ namespace SaveChangesEventHandlers.Example.SaveChangesEventsHandlers.Implementat
             this.logger.LogInformation("before contact is updated");
         }
 
-        public Type HandlerForType() => typeof(Contact);
-
         public void BeforeDelete(Contact entity)
         {
             this.logger.LogInformation("before contact is deleted".ToUpper());

@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SaveChangesEventHandlers.Core.Abstraction;
-using SaveChangesEventHandlers.Core.Abstraction.Entities;
 using System.Transactions;
 using SaveChangesEventHandlers.Core.Extensions;
 
@@ -9,6 +8,8 @@ namespace SaveChangesEventHandlers.Core.Implemention
 {
     public class SaveChangesEventsDispatcher : ISaveChangesEventsDispatcher
     {
+        public IEnumerable<Type> SuportedTypes { get; set; }
+
         private Dictionary<EntityState, List<EntityEntry>> entitesForAfterProcessing { get; set; } = new()
         {
             {EntityState.Added, new() },
@@ -20,14 +21,16 @@ namespace SaveChangesEventHandlers.Core.Implemention
 
         private readonly SaveChangesEventsProvider saveChangesEventsProvider;
 
-        public SaveChangesEventsDispatcher(SaveChangesEventsProvider saveChangesEventsProvider)
+
+        public SaveChangesEventsDispatcher(SaveChangesEventsProvider saveChangesEventsProvider, IEnumerable<Type> suportedTypes)
         {
             this.saveChangesEventsProvider = saveChangesEventsProvider;
+            this.SuportedTypes = suportedTypes;
         }
 
         public int SaveChangesWithEventsDispatcher(SaveChangesEventDbContext dbContext, Func<int> saveChanges)
         {
-            using(var scope = new TransactionScope())
+            using (var scope = new TransactionScope())
             {
                 //dbContext.ChangeTracker.DetectChanges();
 
@@ -91,17 +94,17 @@ namespace SaveChangesEventHandlers.Core.Implemention
         {
             if (entites.Any(e => e.State == EntityState.Added))
             {
-                InvokeNewActionForEntites(entites.Where(e => e.State == EntityState.Added), nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted));
+                InvokeNewActionForEntites(entites.Where(e => e.State == EntityState.Added), nameof(ISaveChangesHandler<object>.BeforeNewPersisted));
             }
 
             if (entites.Any(e => e.State == EntityState.Modified))
             {
-                InvokeUpdateActionForEntites(entites.Where(e => e.State == EntityState.Modified), nameof(ISaveChangesHandler<IEntity>.BeforeUpdate), dbContext);
+                InvokeUpdateActionForEntites(entites.Where(e => e.State == EntityState.Modified), nameof(ISaveChangesHandler<object>.BeforeUpdate), dbContext);
             }
 
             if (entites.Any(e => e.State == EntityState.Deleted))
             {
-                InvokeDeleteActionForEntites(entites.Where(e => e.State == EntityState.Deleted), nameof(ISaveChangesHandler<IEntity>.BeforeDelete));
+                InvokeDeleteActionForEntites(entites.Where(e => e.State == EntityState.Deleted), nameof(ISaveChangesHandler<object>.BeforeDelete));
             }
 
             entites.ToList().ForEach(e => this.processedEntities.Add(e.Entity, e.State));
@@ -128,21 +131,21 @@ namespace SaveChangesEventHandlers.Core.Implemention
             });
         }
 
-        public void DispatchAfter(Dictionary<EntityState, List<EntityEntry>> entitesPerState,SaveChangesEventDbContext dbContext)
+        public void DispatchAfter(Dictionary<EntityState, List<EntityEntry>> entitesPerState, SaveChangesEventDbContext dbContext)
         {
             if (entitesPerState[EntityState.Added].Any())
             {
-                InvokeNewActionForEntites(entitesPerState[EntityState.Added], nameof(ISaveChangesHandler<IEntity>.AfterNewPersisted));
+                InvokeNewActionForEntites(entitesPerState[EntityState.Added], nameof(ISaveChangesHandler<object>.AfterNewPersisted));
             }
 
             if (entitesPerState[EntityState.Modified].Any())
             {
-                InvokeUpdateActionForEntites(entitesPerState[EntityState.Modified], nameof(ISaveChangesHandler<IEntity>.AfterUpdate), dbContext);
+                InvokeUpdateActionForEntites(entitesPerState[EntityState.Modified], nameof(ISaveChangesHandler<object>.AfterUpdate), dbContext);
             }
 
             if (entitesPerState[EntityState.Deleted].Any())
             {
-                InvokeDeleteActionForEntites(entitesPerState[EntityState.Deleted], nameof(ISaveChangesHandler<IEntity>.AfterDelete));
+                InvokeDeleteActionForEntites(entitesPerState[EntityState.Deleted], nameof(ISaveChangesHandler<object>.AfterDelete));
             }
         }
 
@@ -170,7 +173,7 @@ namespace SaveChangesEventHandlers.Core.Implemention
                     object[] arguments = [entity.Entity];
 
                     var method = handler.GetType().GetMethod(methodName);
-                    
+
                     method?.Invoke(handler, arguments);
                 }
             }

@@ -1,8 +1,6 @@
-﻿using SaveChangesEventHandlers.Core.Abstraction.Entities;
-
-namespace SaveChangesEventHandlers.Core.Abstraction
+﻿namespace SaveChangesEventHandlers.Core.Abstraction
 {
-    public interface ISoftDeletableEntity : IEntity
+    public interface ISoftDeletableEntity
     {
         bool IsSoftDeleted { get; set; }
     }

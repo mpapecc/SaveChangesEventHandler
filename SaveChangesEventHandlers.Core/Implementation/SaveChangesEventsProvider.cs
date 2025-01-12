@@ -12,15 +12,12 @@ namespace SaveChangesEventHandlers.Core.Implemention
             this.serviceProvider = serviceProvider;
         }
 
-        public Dictionary<Type, ISaveChangesHandlerKey> GetServiceHandlers()
-        {
-            return this.serviceProvider.GetServices<ISaveChangesHandlerKey>().ToDictionary(s => s.HandlerForType());
-        }
-
         //TODO : get only needed, not all and them filter for one
-        public ISaveChangesHandlerKey? GetServiceHandlerForType(Type handlerForType)
+        public object GetServiceHandlerForType(Type handlerForType)
         {
-            return this.serviceProvider.GetServices<ISaveChangesHandlerKey>().Where(s => s.HandlerForType() == handlerForType).FirstOrDefault();
+            Type specificInterfaceType = typeof(ISaveChangesHandler<>).MakeGenericType(handlerForType);
+
+            return this.serviceProvider.GetService(specificInterfaceType);
         }
     }
 }

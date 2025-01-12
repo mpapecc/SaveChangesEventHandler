@@ -7,12 +7,19 @@ namespace SaveChangesEventsHandler.Test.TestData
 {
     public class TestDbContext: SaveChangesEventDbContext
     {
-        public TestDbContext(DbContextOptions<TestDbContext> options, ISaveChangesEventsDispatcher saveChangesEventsDispatcher) : base(options, saveChangesEventsDispatcher)
+        public TestDbContext(
+            DbContextOptions<TestDbContext> options, 
+            ISaveChangesEventsDispatcher saveChangesEventsDispatcher) : base(options, saveChangesEventsDispatcher)
         {
         }
 
         public DbSet<TestModel> TestModels { get; set; }
         public DbSet<TestModelNavigation> TestModelNavigations { get; set; }
+
+        public void SaveChangesWithEventHandlers()
+        {
+            base.SaveChangesWithEventHandlers(this);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

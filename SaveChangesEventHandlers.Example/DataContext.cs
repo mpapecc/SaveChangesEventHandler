@@ -8,7 +8,9 @@ namespace SaveChangesEventHandlers.Example
     {
         private readonly ISaveChangesEventsDispatcher saveChangesEventsDispatcher;
 
-        public DataContext(DbContextOptions<DataContext> options, ISaveChangesEventsDispatcher saveChangesEventsDispatcher) 
+        public DataContext
+            (DbContextOptions<DataContext> options, 
+            ISaveChangesEventsDispatcher saveChangesEventsDispatcher) 
             : base(options, saveChangesEventsDispatcher)
         {
             this.saveChangesEventsDispatcher = saveChangesEventsDispatcher;
@@ -21,9 +23,9 @@ namespace SaveChangesEventHandlers.Example
         public DbSet<Email> Emails { get; set; }
         public DbSet<Number> Numbers { get; set; }
 
-        public override int SaveChanges()
+        public int SaveChangesWithEventHandlers()
         {
-            return saveChangesEventsDispatcher.SaveChangesWithEventsDispatcher(this, base.SaveChanges);
+            return base.SaveChangesWithEventHandlers(this);
         }
 
 

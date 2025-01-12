@@ -1,8 +1,6 @@
-﻿using SaveChangesEventHandlers.Core.Abstraction.Entities;
-
-namespace SaveChangesEventHandlers.Core.Abstraction
+﻿namespace SaveChangesEventHandlers.Core.Abstraction
 {
-    public interface ISaveChangesHandler<in T> : ISaveChangesHandlerKey where T : class,IEntity
+    public interface ISaveChangesHandler<in T> : ISaveChangesHandlerKey where T : class
     {
         void BeforeNewPersisted(T entity);
         void AfterNewPersisted(T entity);

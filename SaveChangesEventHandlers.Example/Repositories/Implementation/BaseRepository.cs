@@ -71,7 +71,7 @@ namespace SaveChangesEventHandlers.Example.Repositories.Implementation
 
         public bool Commit()
         {
-            return _context.SaveChanges() > 0;
+            return _context.SaveChangesWithEventHandlers() > 0;
         }
     }
 }
