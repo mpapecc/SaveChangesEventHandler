@@ -1,5 +1,4 @@
 ﻿using SaveChangesEventHandlers.Core.Abstraction;
-using SaveChangesEventHandlers.Core.Abstraction.Entities;
 using SaveChangesEventsHandler.Test.TestData.Entites;
 
 namespace SaveChangesEventsHandler.Test.TestData
@@ -25,13 +24,13 @@ namespace SaveChangesEventsHandler.Test.TestData
 
         public void BeforeNewPersisted(TestModel entity)
         {
-            entity.FirstName = nameof(ISaveChangesHandler<IEntity>.BeforeNewPersisted);
+            entity.FirstName = nameof(ISaveChangesHandler<object>.BeforeNewPersisted);
             entity.TestModelNavigations.Add(new TestModelNavigation() { LastName = "from handler" });
         }
 
         public void BeforeUpdate(TestModel oldEntity, TestModel newEntity)
         {
-            newEntity.FirstName = nameof(ISaveChangesHandler<IEntity>.BeforeUpdate);
+            newEntity.FirstName = nameof(ISaveChangesHandler<object>.BeforeUpdate);
         }
 
         public Type HandlerForType() => typeof(TestModel);

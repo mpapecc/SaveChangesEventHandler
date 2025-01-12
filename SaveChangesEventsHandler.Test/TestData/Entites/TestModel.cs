@@ -1,6 +1,4 @@
-﻿using SaveChangesEventHandlers.Core.Abstraction.Entities;
-
-namespace SaveChangesEventsHandler.Test.TestData.Entites
+﻿namespace SaveChangesEventsHandler.Test.TestData.Entites
 {
     public class TestModel : BaseEntity
     {

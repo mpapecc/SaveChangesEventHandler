@@ -3,6 +3,7 @@ using SaveChangesEventHandlers.Core;
 using SaveChangesEventHandlers.Core.Abstraction;
 using SaveChangesEventHandlers.Core.Implemention;
 using SaveChangesEventsHandler.Test.TestData;
+using SaveChangesEventsHandler.Test.TestData.Entites;
 
 namespace SaveChangesEventsHandler.Test.Tests
 {
@@ -36,8 +37,11 @@ namespace SaveChangesEventsHandler.Test.Tests
         [TestMethod]
         public void test_TestModelSaveChangesHandler_is_registred()
         {
-            var service = serviceProvider.GetServices<ISaveChangesHandlerKey>();
-            Assert.IsTrue(service.Count() == 2);
+            var testModelSaveChangesEventHandler = serviceProvider.GetServices(typeof(ISaveChangesHandler<TestModel>));
+            Assert.IsNotNull(testModelSaveChangesEventHandler);
+
+            var testModelNavigationSaveChangesEventHandler = serviceProvider.GetServices(typeof(ISaveChangesHandler<TestModelNavigation>));
+            Assert.IsNotNull(testModelNavigationSaveChangesEventHandler);
         }
 
         [ClassCleanup]

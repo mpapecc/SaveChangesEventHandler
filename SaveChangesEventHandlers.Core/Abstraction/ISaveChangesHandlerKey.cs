@@ -2,6 +2,5 @@
 {
     public interface ISaveChangesHandlerKey
     {
-        Type HandlerForType();
     }
 }

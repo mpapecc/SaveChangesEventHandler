@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore;
-using SaveChangesEventHandlers.Core.Abstraction.Entities;
 using SaveChangesEventHandlers.Core.Abstraction;
 
 namespace SaveChangesEventHandlers.Core.Extensions
@@ -13,35 +12,6 @@ namespace SaveChangesEventHandlers.Core.Extensions
                           .Where(e => !processedEntities.ContainsKey(e.Entity));
         }
 
-        public static object CreateOriginalObjectWithAllProperties(this EntityEntry entityEntry)
-        {
-            var originalValues = new Dictionary<string, object?>();
-
-            foreach (var item in entityEntry.Collections)
-            {
-                originalValues.Add(item.Metadata.Name, item.CurrentValue);
-            }
-
-            foreach (var item in entityEntry.References)
-            {
-                originalValues.Add(item.Metadata.Name, item.CurrentValue);
-            }
-
-            foreach (var item in entityEntry.Properties)
-            {
-                originalValues.Add(item.Metadata.Name, item.OriginalValue);
-            }
-
-            var originalObject = Activator.CreateInstance(entityEntry.Metadata.ClrType);
-
-            foreach (var item in originalValues)
-            {
-                originalObject.GetType().GetProperty(item.Key).SetValue(originalObject, item.Value, null);
-            }
-
-            return originalObject;
-        }
-
         public static object GetOriginalObject(this EntityEntry entityEntry, SaveChangesEventDbContext dbContext)
         {
             return dbContext.EntitesForUpdate[entityEntry.Entity];
@@ -50,7 +20,7 @@ namespace SaveChangesEventHandlers.Core.Extensions
         public static IEnumerable<EntityEntry> SetEmptyEntityEntryCollectionProperties(this IEnumerable<EntityEntry> entityEntries)
         {
 
-            foreach(var entry in entityEntries)
+            foreach (var entry in entityEntries)
             {
                 foreach (var property in entry.Collections)
                 {
@@ -58,7 +28,7 @@ namespace SaveChangesEventHandlers.Core.Extensions
                     // and trying to add item in EventHandlers will throw error
                     if (property.CurrentValue is null)
                     {
-                        property.CurrentValue = Activator.CreateInstance(property.Metadata.ClrType) as IEnumerable<BaseEntity>;
+                        property.CurrentValue = Activator.CreateInstance(property.Metadata.ClrType) as IEnumerable<object>;
                     }
                 }
             }

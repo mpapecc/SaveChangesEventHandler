@@ -8,21 +8,22 @@ namespace SaveChangesEventHandlers.Core.Abstraction
         private readonly ISaveChangesEventsDispatcher saveChangesEventsDispatcher;
         public Dictionary<object, object> EntitesForUpdate { get; set; } = new Dictionary<object, object>();
 
-        protected SaveChangesEventDbContext(DbContextOptions options, ISaveChangesEventsDispatcher saveChangesEventsDispatcher) : base(options)
+        protected SaveChangesEventDbContext(
+            DbContextOptions options,
+            ISaveChangesEventsDispatcher saveChangesEventsDispatcher) : base(options)
         {
             this.saveChangesEventsDispatcher = saveChangesEventsDispatcher;
         }
 
-        public virtual int SaveChangesWithEventHandlers()
+        protected int SaveChangesWithEventHandlers(SaveChangesEventDbContext context)
         {
-
-            return this.saveChangesEventsDispatcher.SaveChangesWithEventsDispatcher(this, base.SaveChanges);
+            return this.saveChangesEventsDispatcher.SaveChangesWithEventsDispatcher(context, base.SaveChanges);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.AddInterceptors(new EntitesForUpdateInterceptor(this));
+            optionsBuilder.AddInterceptors(new EntitesForUpdateInterceptor(this, saveChangesEventsDispatcher.SuportedTypes));
         }
     }
 }

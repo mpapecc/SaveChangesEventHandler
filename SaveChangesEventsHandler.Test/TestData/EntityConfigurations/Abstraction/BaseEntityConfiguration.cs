@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using SaveChangesEventHandlers.Core.Abstraction.Entities;
+using SaveChangesEventsHandler.Test.TestData.Entites;
 
 namespace SaveChangesEventsHandler.Test.TestData.EntityConfigurations.Abstraction
 {
