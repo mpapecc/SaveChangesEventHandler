@@ -16,9 +16,9 @@ Add all requred infrastructure services to dependency container with **AddSaveCh
 public class SaveChangesHandler : ISaveChangesHandler<Entity>
 {
 	
-	public SaveChangesHandler(SomeDependency someDependency)
-	{
-	}
+    public SaveChangesHandler(SomeDependency someDependency)
+    {
+    }
 	
     public void AfterNewPersisted(Entity entity)
     {
