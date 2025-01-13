@@ -36,11 +36,11 @@ public class SaveChangesHandler : ISaveChangesHandler<Entity>
     {
     }
 
-    public void BeforeDelete(Contact entity)
+    public void BeforeDelete(Entity entity)
     {
     }
 
-    public void AfterDelete(Contact entity)
+    public void AfterDelete(Entity entity)
     {
     }
 }
